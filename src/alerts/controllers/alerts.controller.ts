@@ -1,11 +1,16 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AlertDto } from '../dtos/response/alert.dto';
 import { CreateAlertDto } from '../dtos/request/create-alert.dto';
+import { AlertsQueryDto } from '../dtos/request/alerts-query.dto';
+import { AlertsService } from '../services/alerts.service';
 
 @Controller('alerts')
 export class AlertsController {
+  constructor(private readonly alertsService: AlertsService) {}
+
   @Get()
-  async getAlerts(): Promise<any> {
+  async getAlerts(@Query() alertsQuery: AlertsQueryDto): Promise<any> {
+    console.log(alertsQuery);
     return [];
   }
 
@@ -16,13 +21,7 @@ export class AlertsController {
 
   @Post()
   async createAlert(@Body() createAlertDto: CreateAlertDto): Promise<AlertDto> {
-    return Promise.resolve({
-      id: 'abc',
-      amount: createAlertDto.amount,
-      type: createAlertDto.type,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    return this.alertsService.createAlert(createAlertDto);
   }
 
   @Post('/:alertId/validation')

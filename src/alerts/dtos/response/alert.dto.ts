@@ -4,7 +4,7 @@ import { CoinDto } from './coin.dto';
 
 @Exclude()
 export class AlertDto {
-  @Expose()
+  @Expose({ name: '_id' })
   id: string;
 
   @Expose()
