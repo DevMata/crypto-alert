@@ -1,14 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 import { AlertType } from '../types/alert-type.enum';
 
 export type AlertDocument = Alert & Document;
 
 @Schema({ timestamps: true })
 export class Alert {
-  @Prop({ type: Types.ObjectId })
-  id: string;
-
   @Prop()
   uuid: string;
 
@@ -17,6 +14,15 @@ export class Alert {
 
   @Prop()
   amount: number;
+
+  @Prop()
+  status: string;
+
+  @Prop()
+  execution: string;
+
+  @Prop()
+  executedAt?: Date;
 }
 
 export const AlertSchema = SchemaFactory.createForClass(Alert);

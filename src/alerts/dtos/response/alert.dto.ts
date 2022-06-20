@@ -8,10 +8,10 @@ export class AlertDto {
   id: string;
 
   @Expose()
-  amount: number;
+  type: AlertType;
 
   @Expose()
-  type: AlertType;
+  amount: number;
 
   @Expose()
   createdAt: Date;

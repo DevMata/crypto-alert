@@ -1,34 +1,34 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
 export class CoinDto {
-  @Exclude()
+  @Expose()
   uuid: string;
 
-  @Exclude()
+  @Expose()
   symbol: string;
 
-  @Exclude()
+  @Expose()
   name: string;
 
-  @Exclude()
+  @Expose()
   color: string;
 
-  @Exclude()
+  @Expose()
   iconUrl: string;
 
-  @Exclude()
+  @Expose()
   marketCap: string;
 
-  @Exclude()
+  @Expose()
   price: string;
 
-  @Exclude()
+  @Expose()
   btcPrice: string;
 
-  @Exclude()
+  @Expose()
   listedAt: Date;
 
-  @Exclude()
+  @Expose()
   change: string;
 }
