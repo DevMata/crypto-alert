@@ -33,6 +33,8 @@ $ npm run start:prod
 
 ## Env variables
 
+Copy the .env.example into a .env file and fill the following variables.
+
 | Variable            | Description         |
 | :------------------ | :------------------ |
 | PORT                | API port            |
