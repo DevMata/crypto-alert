@@ -4,14 +4,14 @@ import { CoinDto } from './coin.dto';
 
 @Exclude()
 export class AlertDto {
-  @Expose({ name: '_id' })
+  @Expose()
   id: string;
 
   @Expose()
-  amount: number;
+  type: AlertType;
 
   @Expose()
-  type: AlertType;
+  amount: number;
 
   @Expose()
   createdAt: Date;
