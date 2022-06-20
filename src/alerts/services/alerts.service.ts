@@ -91,8 +91,6 @@ export class AlertsService {
         }),
       );
     } catch (error) {
-      console.log(error);
-
       if (error.name === 'CastError') {
         throw new BadRequestException('Invalid id was passed.');
       }
