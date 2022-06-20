@@ -31,4 +31,7 @@ export class AlertDto {
   @Type(() => CoinDto)
   @Expose()
   coin?: CoinDto;
+
+  @Expose()
+  message?: string;
 }

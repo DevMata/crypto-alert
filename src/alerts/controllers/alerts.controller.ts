@@ -1,23 +1,23 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AlertDto } from '../dtos/response/alert.dto';
 import { CreateAlertDto } from '../dtos/request/create-alert.dto';
-import { AlertsQueryDto } from '../dtos/request/alerts-query.dto';
 import { AlertsService } from '../services/alerts.service';
-import { AlertIdParamDto } from '../dtos/request/alert-id-param.dto';
+import { AlertsValidationDto } from '../dtos/request/alerts-validation.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('alerts')
 @Controller('alerts')
 export class AlertsController {
   constructor(private readonly alertsService: AlertsService) {}
 
   @Get()
-  async getAlerts(@Query() alertsQuery: AlertsQueryDto): Promise<any> {
-    console.log(alertsQuery);
-    return [];
+  async getAlerts(): Promise<AlertDto[]> {
+    return this.alertsService.getAlerts();
   }
 
   @Get('/validated')
-  async getValidatedAlerts(): Promise<any> {
-    return [];
+  async getValidatedAlerts(): Promise<AlertDto[]> {
+    return this.alertsService.getValidatedAlerts();
   }
 
   @Post()
@@ -25,8 +25,10 @@ export class AlertsController {
     return this.alertsService.createAlert(createAlertDto);
   }
 
-  @Post('/:alertId/validation')
-  async validateAlert(@Param() paramDto: AlertIdParamDto): Promise<AlertDto> {
-    return this.alertsService.validateAlert(paramDto.alertId);
+  @Post('/validation')
+  async validateAlerts(
+    @Body() alertsValidationDto: AlertsValidationDto,
+  ): Promise<AlertDto[]> {
+    return this.alertsService.validateAlerts(alertsValidationDto.ids);
   }
 }
