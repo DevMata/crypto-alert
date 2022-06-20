@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import { plainToInstance } from 'class-transformer';
 import { CreateAlertDto } from '../dtos/request/create-alert.dto';
 import { AlertDto } from '../dtos/response/alert.dto';
-import { AlertsQueryDto } from '../dtos/request/alerts-query.dto';
 import { CoinrankingHttpService } from '../../common/services/coinranking-http-service';
 
 @Injectable()
@@ -15,16 +14,25 @@ export class AlertsService {
     private readonly coinrankingHttpService: CoinrankingHttpService,
   ) {}
 
-  async getAlerts(alertsQuery: AlertsQueryDto): Promise<AlertDto[]> {
-    return [];
+  async getAlerts(): Promise<AlertDto[]> {
+    const alerts = await this.alertModel.find();
+
+    return plainToInstance(AlertDto, alerts);
   }
 
-  async GetValidatedAlerts(): Promise<AlertDto[]> {
-    return [];
+  async getValidatedAlerts(): Promise<AlertDto[]> {
+    const alerts = await this.alertModel.find().where('execution').ne('task');
+
+    return plainToInstance(AlertDto, alerts);
   }
 
   async createAlert(createAlertDto: CreateAlertDto): Promise<AlertDto> {
-    const newAlert = new this.alertModel({ ...createAlertDto });
+    const coin = await this.coinrankingHttpService.getCoin(createAlertDto.uuid);
+    if (!coin) {
+      throw new NotFoundException(`Coin ${createAlertDto.uuid} not found.`);
+    }
+
+    const newAlert = new this.alertModel({ ...createAlertDto, coin });
     await newAlert.save();
 
     return plainToInstance(AlertDto, {
