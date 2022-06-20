@@ -6,6 +6,12 @@
 
 A NestJS and MongoDB RESTful API that handles alerts for crypto prices.
 
+## Targets versions
+
+* Node.js: 16.15.0
+* NPM: 8.5.5
+* NestJS: 8.0.0
+
 ## Installation
 
 ```bash
@@ -24,6 +30,32 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+
+## Env variables
+
+| Variable            | Description         |
+| :------------------ | :------------------ |
+| PORT                | API port            |
+| MONGO_URL           | MongoDB server URL  |
+| COINRANKING_URL     | Coinranking URL     |
+| COINRANKING_API_KEY | Coinranking api key |
+
+## Resources
+
+If you run the API locally your base URL is: ```http://localhost:<YOUR PORT>```
+
+```bash
+GET /alerts
+
+POST /alerts
+
+GET /alerts/validated
+
+POST /alerts/validation
+```
+## OpenAPI
+
+The ```/docs``` route provides an OpenAPI documentation.
 
 ## Stay in touch
 
