@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { AlertsModule } from './alerts/alerts.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { HttpModule } from '@nestjs/axios';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -16,12 +16,11 @@ import { HttpModule } from '@nestjs/axios';
         uri: configService.get<string>('MONGO_URL'),
       }),
     }),
-    HttpModule.register({
-      timeout: 1000,
-    }),
     CacheModule.register({
       ttl: 1,
+      isGlobal: true,
     }),
+    CommonModule,
   ],
   controllers: [AppController],
   providers: [AppService],
