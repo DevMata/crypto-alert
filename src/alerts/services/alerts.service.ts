@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Alert, AlertDocument } from '../database/alert.schema';
 import { Model } from 'mongoose';
@@ -52,6 +56,7 @@ export class AlertsService {
       throw new NotFoundException(`Coin ${alert.uuid} not found.`);
     }
 
+    alert.coin = coin;
     alert.execution = 'manual';
     alert.executedAt = new Date();
     if (
@@ -64,5 +69,17 @@ export class AlertsService {
     }
     await alert.save();
     return plainToInstance(AlertDto, { ...alert.toObject(), coin });
+  }
+
+  async validateAlerts(alertIds: string[]): Promise<AlertDto[]> {
+    try {
+      return await Promise.all(
+        alertIds.map((alertId) => this.validateAlert(alertId)),
+      );
+    } catch (error) {
+      if (error.name && error.name === 'CastError') {
+        throw new BadRequestException('Invalid id was passed');
+      }
+    }
   }
 }

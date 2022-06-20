@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AlertDto } from '../dtos/response/alert.dto';
 import { CreateAlertDto } from '../dtos/request/create-alert.dto';
 import { AlertsService } from '../services/alerts.service';
-import { AlertIdParamDto } from '../dtos/request/alert-id-param.dto';
+import { AlertsValidationDto } from '../dtos/request/alerts-validation.dto';
 
 @Controller('alerts')
 export class AlertsController {
@@ -23,8 +23,10 @@ export class AlertsController {
     return this.alertsService.createAlert(createAlertDto);
   }
 
-  @Post('/:alertId/validation')
-  async validateAlert(@Param() paramDto: AlertIdParamDto): Promise<AlertDto> {
-    return this.alertsService.validateAlert(paramDto.alertId);
+  @Post('/validation')
+  async validateAlerts(
+    @Body() alertsValidationDto: AlertsValidationDto,
+  ): Promise<AlertDto[]> {
+    return this.alertsService.validateAlerts(alertsValidationDto.ids);
   }
 }
