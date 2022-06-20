@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { AlertType } from '../types/alert-type.enum';
 
@@ -15,14 +15,30 @@ export class Alert {
   @Prop()
   amount: number;
 
-  @Prop()
+  @Prop({ default: null })
   status: string;
 
-  @Prop()
+  @Prop({ default: 'task' })
   execution: string;
 
-  @Prop()
+  @Prop({ default: null })
   executedAt?: Date;
+
+  @Prop(
+    raw({
+      uuid: { type: String },
+      symbol: { type: String },
+      name: { type: String },
+      color: { type: String },
+      iconUrl: { type: String },
+      marketCap: { type: String },
+      price: { type: String },
+      btcPrice: { type: String },
+      listedAt: { type: Date },
+      change: { type: String },
+    }),
+  )
+  coin: Record<string, any>;
 }
 
 export const AlertSchema = SchemaFactory.createForClass(Alert);

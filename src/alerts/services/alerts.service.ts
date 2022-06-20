@@ -1,11 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Alert, AlertDocument } from '../database/alert.schema';
 import { Model } from 'mongoose';
 import { plainToInstance } from 'class-transformer';
 import { CreateAlertDto } from '../dtos/request/create-alert.dto';
 import { AlertDto } from '../dtos/response/alert.dto';
-import { AlertsQueryDto } from '../dtos/request/alerts-query.dto';
 import { CoinrankingHttpService } from '../../common/services/coinranking-http-service';
 
 @Injectable()
@@ -15,16 +19,25 @@ export class AlertsService {
     private readonly coinrankingHttpService: CoinrankingHttpService,
   ) {}
 
-  async getAlerts(alertsQuery: AlertsQueryDto): Promise<AlertDto[]> {
-    return [];
+  async getAlerts(): Promise<AlertDto[]> {
+    const alerts = await this.alertModel.find();
+
+    return plainToInstance(AlertDto, alerts);
   }
 
-  async GetValidatedAlerts(): Promise<AlertDto[]> {
-    return [];
+  async getValidatedAlerts(): Promise<AlertDto[]> {
+    const alerts = await this.alertModel.find().where('execution').ne('task');
+
+    return plainToInstance(AlertDto, alerts);
   }
 
   async createAlert(createAlertDto: CreateAlertDto): Promise<AlertDto> {
-    const newAlert = new this.alertModel({ ...createAlertDto });
+    const coin = await this.coinrankingHttpService.getCoin(createAlertDto.uuid);
+    if (!coin) {
+      throw new NotFoundException(`Coin ${createAlertDto.uuid} not found.`);
+    }
+
+    const newAlert = new this.alertModel({ ...createAlertDto, coin });
     await newAlert.save();
 
     return plainToInstance(AlertDto, {
@@ -44,6 +57,7 @@ export class AlertsService {
       throw new NotFoundException(`Coin ${alert.uuid} not found.`);
     }
 
+    alert.coin = coin;
     alert.execution = 'manual';
     alert.executedAt = new Date();
     if (
@@ -55,6 +69,39 @@ export class AlertsService {
       alert.status = 'fail';
     }
     await alert.save();
-    return plainToInstance(AlertDto, { ...alert.toObject(), coin });
+    return plainToInstance(AlertDto, {
+      ...alert.toObject(),
+      id: alert._id.toString(),
+      coin,
+    });
+  }
+
+  async validateAlerts(alertIds: string[]): Promise<AlertDto[]> {
+    try {
+      const results = await Promise.allSettled(
+        alertIds.map((alertId) => this.validateAlert(alertId)),
+      );
+      return plainToInstance(
+        AlertDto,
+        results.map((result) => {
+          if (result.status === 'fulfilled') {
+            return result.value;
+          }
+          return { message: result.reason.message };
+        }),
+      );
+    } catch (error) {
+      console.log(error);
+
+      if (error.name === 'CastError') {
+        throw new BadRequestException('Invalid id was passed.');
+      }
+
+      if (error.name === 'NotFoundException') {
+        throw new NotFoundException(error.message);
+      }
+
+      throw new InternalServerErrorException('Something went really wrong.');
+    }
   }
 }
