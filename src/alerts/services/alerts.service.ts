@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -68,18 +69,39 @@ export class AlertsService {
       alert.status = 'fail';
     }
     await alert.save();
-    return plainToInstance(AlertDto, { ...alert.toObject(), coin });
+    return plainToInstance(AlertDto, {
+      ...alert.toObject(),
+      id: alert._id.toString(),
+      coin,
+    });
   }
 
   async validateAlerts(alertIds: string[]): Promise<AlertDto[]> {
     try {
-      return await Promise.all(
+      const results = await Promise.allSettled(
         alertIds.map((alertId) => this.validateAlert(alertId)),
       );
+      return plainToInstance(
+        AlertDto,
+        results.map((result) => {
+          if (result.status === 'fulfilled') {
+            return result.value;
+          }
+          return { message: result.reason.message };
+        }),
+      );
     } catch (error) {
-      if (error.name && error.name === 'CastError') {
-        throw new BadRequestException('Invalid id was passed');
+      console.log(error);
+
+      if (error.name === 'CastError') {
+        throw new BadRequestException('Invalid id was passed.');
       }
+
+      if (error.name === 'NotFoundException') {
+        throw new NotFoundException(error.message);
+      }
+
+      throw new InternalServerErrorException('Something went really wrong.');
     }
   }
 }
